@@ -20,23 +20,34 @@ const settings = {
 	'lightColor': '#ffffff'
 };
 
+const replaceSpecialCharacters = function(input) {
+	let value = input.replace(/Ö/g, 'OE');
+	value = value.replace(/Ü/g, 'UE');
+	value = value.replace(/Ä/g, 'AE');
+	value = value.replace(/ä/g, 'ae');
+	value = value.replace(/ö/g, 'oe');
+	value = value.replace(/ü/g, 'ue');
+	value = value.replace(/ß/g, 'ss');
+	return value;
+};
+
 const giroCodeString = function (params) {
 	const sep = "\n";
 
 	const data = {
 		'service': 'BCD',
-		'version': '001',
-		'encoding': '2', // 1 = UTF-8, 2 = ISO 8859-1
+		'version': params.bic.trim() ? '001' : '002',
+		'encoding': '1', // 1 = UTF-8, 2 = ISO 8859-1
 		'transfer': 'SCT',
 		'bic': params.bic.trim(),
-		'name': params.name.trim(),
+		'name': replaceSpecialCharacters(params.name).trim().substring(0,70), // max of 70 characters
 		'iban': params.iban.replace(' ', '').trim(),
 		'currency': params.currency.trim().toUpperCase(),
 		'amount': parseFloat(params.amount.trim()),
-		'char': '',
-		'ref': '',
-		'reason': params.reason.trim().replace(sep, ' ').substring(0, 140), // max of 140 characters
-		'hint': ''
+		'char': '', // 4 digit key - like SALA, ...
+		'ref': '', // reference - alternative to reason, max of 25 characters
+		'reason': replaceSpecialCharacters(params.reason).trim().replace(sep, ' ').substring(0, 140), // max of 140 characters
+		'hint': '' // max of 70 characters
 	};
 
 	let epcString = data.service;
@@ -50,6 +61,7 @@ const giroCodeString = function (params) {
 	epcString += sep + data.char;
 	epcString += sep + data.ref;
 	epcString += sep + data.reason;
+	epcString += sep + data.hint;
 
 	return epcString;
 }
