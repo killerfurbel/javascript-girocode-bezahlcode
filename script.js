@@ -118,6 +118,28 @@ const makeQR = function (ele, str) {
 	}
 }
 
+const updateHash = function() {
+	const oSearchParams = new URLSearchParams({
+		'bic': fields.bic.value,
+		'name': fields.recipient.value,
+		'iban': fields.iban.value,
+		'currency': fields.currency.value,
+		'amount': fields.amount.value,
+		'reason': fields.reason.value
+	});
+	location.hash = '#' + oSearchParams.toString();
+}
+
+const updateFromhash = function() {
+	const oSearchParams = new URLSearchParams(location.hash.substring(1));
+	fields.bic.value = oSearchParams.get('bic');
+	fields.recipient.value = oSearchParams.get('name');
+	fields.iban.value = oSearchParams.get('iban');
+	fields.currency.value = oSearchParams.get('currency');
+	fields.amount.value = oSearchParams.get('amount');
+	fields.reason.value = oSearchParams.get('reason');
+}
+
 const updateCode = function (e) {
 	e.preventDefault();
 
@@ -125,6 +147,7 @@ const updateCode = function (e) {
 
 	makeGiroCode();
 	makeBezahlCode();
+	updateHash();
 }
 
 document.querySelector('#generate').addEventListener('click', updateCode);
@@ -138,6 +161,9 @@ document.querySelectorAll('a[download]').forEach(function (ele, i) {
 		ele.setAttribute('href', 'data:image/svg+xml;utf8,' + svg.outerHTML);
 	});
 });
+
+updateFromhash();
+addEventListener("hashchange", updateFromhash)
 
 /*
 // fill in test data
